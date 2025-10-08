@@ -15,71 +15,43 @@ pipeline {
             }
         }
         
-        stage('Check Files') {
-            steps {
-                bat 'dir /s'  // List all files to verify structure
-                bat 'type pom.xml'  // Show pom.xml content
-            }
-        }
-        
         stage('Build Java Application') {
             steps {
-                bat 'mvn -version'  // Check Maven installation
-                bat 'mvn clean compile -X'  // Run with debug info
+                bat 'mvn clean compile'
                 bat 'mvn package -DskipTests'
             }
             post {
                 success {
-                    echo 'Java application built successfully!'
+                    echo '✅ Java application built successfully!'
                     archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                }
-                failure {
-                    echo 'Java build failed! Check Maven installation and pom.xml'
-                    bat 'dir target'  // Check if target directory exists
+                    bat 'dir target\\*.jar'
                 }
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Manual Docker Instructions') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
-            }
-        }
-        
-        stage('Test Docker Image') {
-            steps {
-                script {
-                    def testContainer = docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                    testContainer.inside {
-                        bat 'java -jar /app/app.jar'
-                    }
-                }
-            }
-        }
-        
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                    }
-                }
+                echo '📝 DOCKER MANUAL STEPS (since Docker is not working on this server):'
+                echo '1. Build Docker image manually:'
+                echo '   docker build -t priti12k24/java-docker-app .'
+                echo '2. Test Docker image:'
+                echo '   docker run --rm priti12k24/java-docker-app'
+                echo '3. Push to Docker Hub:'
+                echo '   docker push priti12k24/java-docker-app'
+                echo ''
+                echo '⚠️  Docker is currently not available on this Jenkins server'
+                echo '✅ But your Java application is built successfully!'
             }
         }
     }
     
     post {
         always {
-            echo 'Pipeline execution finished!'
-            cleanWs()
+            echo 'Pipeline completed!'
         }
         success {
-            echo "SUCCESS: Pipeline completed successfully!"
-        }
-        failure {
-            echo "FAILED: Pipeline execution failed! Check the stages above for errors."
+            echo '🎉 SUCCESS: Java application built and ready!'
+            echo 'JAR file is available in target/ directory'
         }
     }
 }
