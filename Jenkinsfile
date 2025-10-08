@@ -5,15 +5,13 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         DOCKER_IMAGE = 'priti12k24/java-docker-app'
         DOCKER_TAG = "latest"
-        GIT_REPO = 'https://github.com/Priti12K24/java-docker-application.git'
     }
     
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: "${GIT_REPO}",
-                    credentialsId: 'github-credentials'
+                    url: 'https://github.com/Priti12K24/java-docker-application.git'
             }
         }
         
@@ -71,18 +69,10 @@ pipeline {
             cleanWs()
         }
         success {
-            emailext (
-                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: "The Docker image has been built and pushed successfully!\n\nCheck console output at: ${env.BUILD_URL}",
-                to: "korakepriti2@gmail.com"
-            )
+            echo "SUCCESS: Docker image built and pushed successfully!"
         }
         failure {
-            emailext (
-                subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: "The pipeline failed. Please check the console output at: ${env.BUILD_URL}",
-                to: "korakepriti2@gmail.com"
-            )
+            echo "FAILED: Pipeline execution failed!"
         }
     }
 }
