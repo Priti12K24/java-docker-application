@@ -15,15 +15,27 @@ pipeline {
             }
         }
         
+        stage('Check Files') {
+            steps {
+                bat 'dir /s'  // List all files to verify structure
+                bat 'type pom.xml'  // Show pom.xml content
+            }
+        }
+        
         stage('Build Java Application') {
             steps {
-                bat 'mvn clean compile'
+                bat 'mvn -version'  // Check Maven installation
+                bat 'mvn clean compile -X'  // Run with debug info
                 bat 'mvn package -DskipTests'
             }
             post {
                 success {
                     echo 'Java application built successfully!'
                     archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+                failure {
+                    echo 'Java build failed! Check Maven installation and pom.xml'
+                    bat 'dir target'  // Check if target directory exists
                 }
             }
         }
@@ -55,24 +67,19 @@ pipeline {
                     }
                 }
             }
-            post {
-                success {
-                    echo "Docker image pushed to Docker Hub: ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                }
-            }
         }
     }
     
     post {
         always {
-            echo 'Pipeline completed!'
+            echo 'Pipeline execution finished!'
             cleanWs()
         }
         success {
-            echo "SUCCESS: Docker image built and pushed successfully!"
+            echo "SUCCESS: Pipeline completed successfully!"
         }
         failure {
-            echo "FAILED: Pipeline execution failed!"
+            echo "FAILED: Pipeline execution failed! Check the stages above for errors."
         }
     }
 }
