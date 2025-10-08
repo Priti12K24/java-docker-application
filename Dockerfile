@@ -1,10 +1,10 @@
-# Use an official OpenJDK image
+# Use official OpenJDK base image
 FROM openjdk:17-jdk-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy jar file into the image
+# Copy target jar to /app
 COPY target/*.jar app.jar
 
 # Expose port (optional)
