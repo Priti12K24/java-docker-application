@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
-        DOCKER_IMAGE = '7887411946/java-docker-app'
+        DOCKER_IMAGE = 'priti12k24/java-docker-app'
         DOCKER_TAG = "latest"
         GIT_REPO = 'https://github.com/Priti12K24/java-docker-application.git'
     }
@@ -13,14 +13,14 @@ pipeline {
             steps {
                 git branch: 'main',
                     url: "${GIT_REPO}",
-                    credentialsId: 'GitHub'
+                    credentialsId: 'github-credentials'
             }
         }
         
         stage('Build Java Application') {
             steps {
-                sh 'mvn clean compile'
-                sh 'mvn package -DskipTests'
+                bat 'mvn clean compile'
+                bat 'mvn package -DskipTests'
             }
             post {
                 success {
@@ -43,7 +43,7 @@ pipeline {
                 script {
                     def testContainer = docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}")
                     testContainer.inside {
-                        sh 'java -jar /app/app.jar'
+                        bat 'java -jar /app/app.jar'
                     }
                 }
             }
